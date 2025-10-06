@@ -76,19 +76,52 @@
       border-top:1px solid rgba(0,0,0,.07)
     }
 
-    /* ===== Modal / Player page ===== */
-    .modal-backdrop{
-      position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;
-      align-items:center;justify-content:center;padding:16px;z-index:50
+    /* ===== Modal / Player page — mobile-friendly ===== */
+    @supports (height: 100dvh) {
+      .modal-backdrop { min-height: 100dvh; }
     }
-    .modal{max-width:1100px;width:100%;background:transparent;border-radius:18px;box-shadow:none;border:0;overflow:visible}
-    .modal-header{display:flex;align-items:center;gap:12px;padding:12px 0 8px 0;justify-content:flex-end}
-    .close-x{background:transparent;border:none;font-size:22px;line-height:1;cursor:pointer;color:#fff}
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.45);
+      display:none; /* toggled via JS */
+      align-items:stretch; /* plein écran mobile */
+      justify-content:center;
+      padding:0;
+      z-index:50;
+      overflow:auto;                      /* scroll interne modale */
+      -webkit-overflow-scrolling:touch;   /* iOS smooth scroll */
+      overscroll-behavior:contain;        /* évite de scroller le fond */
+    }
+    .modal{
+      width:100%; max-width:1100px; margin:0 auto;
+      background:transparent; border:0; border-radius:0; box-shadow:none;
+      min-height:100vh; display:flex; flex-direction:column;
+    }
+    .modal-header{
+      position:sticky; top:0; z-index:1;
+      display:flex; align-items:center; gap:12px; justify-content:flex-end;
+      padding:calc(8px + env(safe-area-inset-top)) 12px 8px 12px;
+      background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.10));
+      backdrop-filter:blur(6px);
+    }
+    .close-x{
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(0,0,0,.1);
+      color:#1b1b1b;
+      font-size:20px; line-height:1;
+      padding:10px 12px; border-radius:999px; cursor:pointer;
+    }
 
-    .player-row{ display:grid; gap:16px; grid-template-columns: 1fr; }
-    @media(min-width:960px){ .player-row{ grid-template-columns: 380px 1fr; align-items:start; } }
+    .player-row{
+      flex:1 1 auto;
+      overflow:auto;  /* contenu scrolle si long */
+      padding:12px; gap:16px;
+      display:grid; grid-template-columns:1fr;
+    }
+    @media(min-width:960px){
+      .player-row{ grid-template-columns:380px 1fr; align-items:start; }
+    }
     .panel{
-      background: var(--card);
+      background:var(--card);
       border-radius:14px;border:1px solid rgba(0,0,0,.08);
       box-shadow:0 10px 30px rgba(0,0,0,.12); padding:12px
     }
@@ -175,6 +208,21 @@
     .mini-controls .icon:hover{ color:#1f3f2b; }
     @media (max-width:480px){
       .mini-title{ display:none; }
+    }
+
+    /* Masquer le mini-player quand la modale est ouverte */
+    body.modal-open #miniPlayer { display:none; }
+
+    /* Footer modale collant (bouton Fermer en bas en secours) */
+    .modal-footer{
+      position:sticky; bottom:0; z-index:1;
+      display:flex; justify-content:center;
+      padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      background:linear-gradient(0deg, rgba(0,0,0,.06), transparent);
+    }
+    .modal-footer .close-secondary{
+      background:#fff; color:#1b1b1b; border:1px solid rgba(0,0,0,.1);
+      border-radius:999px; padding:10px 16px; font-weight:700; cursor:pointer;
     }
   </style>
 </head>
@@ -268,6 +316,11 @@
           <p class="note" id="hint" style="margin-top:12px">💡 Astuce : cliquez un titre pour le lire. Les morceaux s’enchaînent automatiquement.</p>
         </div>
       </div>
+
+      <!-- Footer modale (bouton Fermer de secours en bas) -->
+      <div class="modal-footer">
+        <button class="close-secondary" id="closePlaylistBottom" title="Fermer">Fermer</button>
+      </div>
     </div>
   </div>
 
@@ -287,16 +340,43 @@
   <audio id="audio" preload="metadata"></audio>
 
   <script>
-    /* Ouverture / fermeture du modal — ne PAS arrêter la musique */
+    /* Ouverture / fermeture du modal — ne PAS arrêter la musique + gestion scroll & mini-player */
     const modal = document.getElementById('playlistModal');
     const openBtn = document.getElementById('openPlaylist');
     const closeBtn = document.getElementById('closePlaylist');
-    openBtn.addEventListener('click', ()=>{ modal.style.display='flex'; modal.setAttribute('aria-hidden','false'); });
-    closeBtn.addEventListener('click', ()=>{ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); });
+    const closeBottomBtn = document.getElementById('closePlaylistBottom');
 
-    // Accès depuis mini-player
-    document.getElementById('openFromMini').addEventListener('click', ()=>{
-      modal.style.display='flex'; modal.setAttribute('aria-hidden','false');
+    function openModal(){
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden','false');
+      document.body.classList.add('modal-open');              // masque mini-player
+      document.documentElement.style.overflow = 'hidden';     // bloque scroll fond
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(){
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden','true');
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      // On NE touche PAS à l’audio -> la musique continue
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    if (closeBottomBtn) closeBottomBtn.addEventListener('click', closeModal);
+
+    // Fermer si clic sur l’arrière-plan (pas à l’intérieur de la carte)
+    modal.addEventListener('click', (e)=>{
+      if (e.target === modal) closeModal();
+    });
+
+    // Ouvrir depuis mini-player
+    document.getElementById('openFromMini').addEventListener('click', openModal);
+
+    // Échapper = fermer
+    window.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeModal();
     });
 
     /* Lecteur inspiré – playlist auto depuis songs/songs.json */
@@ -361,7 +441,7 @@
         return `${m}:${r.toString().padStart(2,'0')}`;
       };
       function setAlbumBG(){
-        // Si tu veux une image d'album globale, remplace ci-dessous par: url('...') au lieu du 2e dégradé
+        // Si tu veux une image d'album globale, remplace par: url('...') au lieu du 2e dégradé
         albumBg.style.backgroundImage =
           `linear-gradient(rgba(54,79,60,0.25), rgba(14,124,87,0.55))`;
       }
@@ -460,6 +540,10 @@
       });
 
       // Progress
+      const timeCurrent = document.getElementById('timeCurrent');
+      const timeTotal = document.getElementById('timeTotal');
+      const progressFill = document.getElementById('progressFill');
+
       audio.addEventListener('loadedmetadata', ()=>{
         timeTotal.textContent = '-'+fmt(audio.duration);
       });
@@ -474,6 +558,7 @@
       audio.addEventListener('ended', next);
 
       // Seek (clic sur la barre)
+      const progressBar = document.getElementById('progressBar');
       progressBar.addEventListener('click', (e)=>{
         const rect = progressBar.getBoundingClientRect();
         const ratio = (e.clientX - rect.left) / rect.width;
