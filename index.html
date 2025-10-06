@@ -20,7 +20,6 @@
       --bg:#F8FAF9;           /* fond */
       --ink:#364F3C;          /* texte */
       --card:#ffffff;         /* carte */
-      --muted:#6f7f73;        /* texte doux */
       --shadow:0 18px 60px rgba(0,0,0,.25);
     }
 
@@ -77,19 +76,17 @@
     }
 
     /* ===== Modal / Player page — mobile-friendly ===== */
-    @supports (height: 100dvh) {
-      .modal-backdrop { min-height: 100dvh; }
-    }
+    @supports (height: 100dvh) { .modal-backdrop { min-height: 100dvh; } }
     .modal-backdrop{
       position:fixed; inset:0; background:rgba(0,0,0,.45);
-      display:none; /* toggled via JS */
-      align-items:stretch; /* plein écran mobile */
+      display:none;
+      align-items:stretch;                  /* plein écran mobile */
       justify-content:center;
       padding:0;
       z-index:50;
-      overflow:auto;                      /* scroll interne modale */
-      -webkit-overflow-scrolling:touch;   /* iOS smooth scroll */
-      overscroll-behavior:contain;        /* évite de scroller le fond */
+      overflow:auto;                        /* scroll interne modale */
+      -webkit-overflow-scrolling:touch;     /* iOS smooth scroll */
+      overscroll-behavior:contain;          /* évite de scroller le fond */
     }
     .modal{
       width:100%; max-width:1100px; margin:0 auto;
@@ -206,14 +203,11 @@
     .mini-title{ font-weight:700; color:#24412d; overflow:hidden; text-overflow:ellipsis; max-width:48vw; }
     .mini-controls .icon{ margin:0 4px; cursor:pointer; color:var(--green-dark); }
     .mini-controls .icon:hover{ color:#1f3f2b; }
-    @media (max-width:480px){
-      .mini-title{ display:none; }
-    }
 
     /* Masquer le mini-player quand la modale est ouverte */
     body.modal-open #miniPlayer { display:none; }
 
-    /* Footer modale collant (bouton Fermer en bas en secours) */
+    /* Footer modale collant (bouton Fermer en bas) */
     .modal-footer{
       position:sticky; bottom:0; z-index:1;
       display:flex; justify-content:center;
@@ -340,7 +334,7 @@
   <audio id="audio" preload="metadata"></audio>
 
   <script>
-    /* Ouverture / fermeture du modal — ne PAS arrêter la musique + gestion scroll & mini-player */
+    /* ==== Modale : ouverture/fermeture (sans arrêter la musique) ==== */
     const modal = document.getElementById('playlistModal');
     const openBtn = document.getElementById('openPlaylist');
     const closeBtn = document.getElementById('closePlaylist');
@@ -359,61 +353,51 @@
       document.body.classList.remove('modal-open');
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
-      // On NE touche PAS à l’audio -> la musique continue
+      // Ne pas toucher à l'audio => la musique continue
     }
 
     openBtn.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
     if (closeBottomBtn) closeBottomBtn.addEventListener('click', closeModal);
-
-    // Fermer si clic sur l’arrière-plan (pas à l’intérieur de la carte)
-    modal.addEventListener('click', (e)=>{
-      if (e.target === modal) closeModal();
-    });
-
-    // Ouvrir depuis mini-player
+    modal.addEventListener('click', (e)=>{ if (e.target === modal) closeModal(); });
     document.getElementById('openFromMini').addEventListener('click', openModal);
+    window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeModal(); });
 
-    // Échapper = fermer
-    window.addEventListener('keydown', (e)=>{
-      if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeModal();
-    });
-
-    /* Lecteur inspiré – playlist auto depuis songs/songs.json */
+    /* ==== Lecteur (playlist auto depuis songs/songs.json) ==== */
     (async function(){
       const audio = document.getElementById('audio');
 
-      // UI principales
-      const albumBg = document.getElementById('albumBg');
-      const likeBtn = document.getElementById('likeBtn');
-      const playBtn = document.getElementById('playBtn');
-      const pauseBtn = document.getElementById('pauseBtn');
-      const prevBtn = document.getElementById('prevBtn');
-      const nextBtn = document.getElementById('nextBtn');
-      const shuffleBtn = document.getElementById('shuffleBtn');
-      const volBtn = document.getElementById('volBtn');
-      const toggleList = document.getElementById('toggleList');
-      const listPanel = document.getElementById('listPanel');
+      // ---- RÉFÉRENCES UNIQUE (déclarées UNE seule fois) ----
+      const albumBg     = document.getElementById('albumBg');
+      const likeBtn     = document.getElementById('likeBtn');
+      const playBtn     = document.getElementById('playBtn');
+      const pauseBtn    = document.getElementById('pauseBtn');
+      const prevBtn     = document.getElementById('prevBtn');
+      const nextBtn     = document.getElementById('nextBtn');
+      const shuffleBtn  = document.getElementById('shuffleBtn');
+      const volBtn      = document.getElementById('volBtn');
+      const toggleList  = document.getElementById('toggleList');
+      const listPanel   = document.getElementById('listPanel');
 
-      const songName = document.getElementById('songName');
-      const artistName = document.getElementById('artistName');
+      const songName    = document.getElementById('songName');
+      const artistName  = document.getElementById('artistName');
       const progressBar = document.getElementById('progressBar');
-      const progressFill = document.getElementById('progressFill');
+      const progressFill= document.getElementById('progressFill');
       const timeCurrent = document.getElementById('timeCurrent');
-      const timeTotal = document.getElementById('timeTotal');
+      const timeTotal   = document.getElementById('timeTotal');
       const trackListEl = document.getElementById('trackList');
 
       // Mini-player
       const mini = {
-        root: document.getElementById('miniPlayer'),
+        root:  document.getElementById('miniPlayer'),
         title: document.getElementById('miniTitle'),
-        prev: document.getElementById('miniPrev'),
-        next: document.getElementById('miniNext'),
-        play: document.getElementById('miniPlay'),
+        prev:  document.getElementById('miniPrev'),
+        next:  document.getElementById('miniNext'),
+        play:  document.getElementById('miniPlay'),
         pause: document.getElementById('miniPause')
       };
 
-      // Récupère la liste
+      // ---- Données ----
       let tracks = [];
       try{
         const res = await fetch('songs/songs.json', {cache:'no-store'});
@@ -429,19 +413,18 @@
         return;
       }
 
-      // État
+      // ---- État ----
       let index = 0;
       let shuffled = false;
       const liked = new Set();
 
-      // Helpers
-      const fmt = s => {
+      // ---- Helpers ----
+      const fmt = (s) => {
         s = Math.max(0, Math.floor(s));
         const m = Math.floor(s/60), r = s%60;
         return `${m}:${r.toString().padStart(2,'0')}`;
       };
       function setAlbumBG(){
-        // Si tu veux une image d'album globale, remplace par: url('...') au lieu du 2e dégradé
         albumBg.style.backgroundImage =
           `linear-gradient(rgba(54,79,60,0.25), rgba(14,124,87,0.55))`;
       }
@@ -486,7 +469,7 @@
         load(index, true);
       }
 
-      // Construit la liste
+      // ---- Construire la liste ----
       trackListEl.innerHTML = '';
       tracks.forEach((t,i)=>{
         const li = document.createElement('li');
@@ -503,7 +486,7 @@
         trackListEl.appendChild(li);
       });
 
-      // Events UI
+      // ---- Events UI ----
       playBtn.addEventListener('click', play);
       pauseBtn.addEventListener('click', pause);
       nextBtn.addEventListener('click', next);
@@ -539,11 +522,7 @@
         }
       });
 
-      // Progress
-      const timeCurrent = document.getElementById('timeCurrent');
-      const timeTotal = document.getElementById('timeTotal');
-      const progressFill = document.getElementById('progressFill');
-
+      // ---- Progress ----
       audio.addEventListener('loadedmetadata', ()=>{
         timeTotal.textContent = '-'+fmt(audio.duration);
       });
@@ -558,7 +537,6 @@
       audio.addEventListener('ended', next);
 
       // Seek (clic sur la barre)
-      const progressBar = document.getElementById('progressBar');
       progressBar.addEventListener('click', (e)=>{
         const rect = progressBar.getBoundingClientRect();
         const ratio = (e.clientX - rect.left) / rect.width;
@@ -573,7 +551,7 @@
         if (e.key==='ArrowLeft') prev();
       });
 
-      // Init
+      // ---- Init ----
       load(0, false);
     })();
   </script>
