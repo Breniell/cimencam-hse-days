@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CIMENCAM — HSE Days</title>
+  <meta name="description" content="Accès Survey et Playlist HSE Days de CIMENCAM." />
+  <meta property="og:title" content="CIMENCAM — HSE Days" />
+  <meta property="og:description" content="Participez au survey HSE et écoutez la playlist des HSE Days." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0E7C57" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --green:#0E7C57;       /* Vert HSE principal */
+      --green-dark:#1B5E20;  /* Vert foncé */
+      --orange:#F39C12;      /* Accent */
+      --bg:#F8FAF9;          /* Fond clair */
+      --text:#2E2E2E;        /* Texte */
+      --card:#ffffff;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg); color: var(--text); line-height:1.6;
+    }
+    .wrap{max-width: 960px; margin: 0 auto; padding: 24px;}
+    header{
+      display:flex; align-items:center; gap:16px; padding:16px 0 8px;
+      border-bottom: 3px solid rgba(14,124,87,.15);
+    }
+    .logo{
+      width:64px; height:64px; border-radius:12px; object-fit:cover;
+      background:#e6efe9; border:2px solid rgba(14,124,87,.25);
+    }
+    h1{ margin:0; font-weight:800; color:var(--green); letter-spacing:.2px; }
+    .tag{
+      display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700;
+      background:rgba(243,156,18,.12); color:var(--orange); border:1px solid rgba(243,156,18,.35);
+      margin-top:6px;
+    }
+    .hero{ padding:18px 0 6px; }
+    .hero p{ margin:.3rem 0; font-size:1.05rem; }
+    .grid{ display:grid; gap:16px; grid-template-columns: 1fr; margin-top:16px; }
+    @media(min-width:720px){ .grid{ grid-template-columns: 1fr 1fr; } }
+    .card{
+      background:var(--card); border:1px solid rgba(0,0,0,.06); border-radius:18px;
+      padding:20px; box-shadow: 0 8px 30px rgba(0,0,0,.06);
+    }
+    .card h2{ margin-top:0; color:var(--green-dark); }
+    .pill{
+      display:inline-block; font-size:.8rem; padding:4px 10px; border-radius:999px; margin-bottom:8px;
+      background:rgba(14,124,87,.08); color:var(--green-dark); border:1px solid rgba(14,124,87,.25);
+      font-weight:600;
+    }
+    .btn{
+      display:inline-block; width:100%; text-align:center; text-decoration:none;
+      padding:14px 18px; border-radius:14px; font-weight:800; letter-spacing:.3px;
+      transition:transform .06s ease, box-shadow .2s ease, opacity .2s ease;
+      border:2px solid transparent;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.08); }
+    .btn:active{ transform: translateY(0); }
+    .btn-primary{ background:var(--green); color:#fff; }
+    .btn-secondary{ background:#fff; color:var(--green-dark); border-color:rgba(27,94,32,.35); }
+    .note{
+      margin-top:18px; font-size:.94rem; color:#4a4a4a; background:#fff; border:1px dashed rgba(14,124,87,.35);
+      border-radius:14px; padding:12px 14px;
+    }
+    footer{
+      margin:28px 0 8px; padding-top:14px; font-size:.9rem; color:#616161; text-align:center;
+      border-top:1px solid rgba(0,0,0,.07);
+    }
+    .divider{
+      height:1px; background:linear-gradient(to right, transparent, rgba(14,124,87,.25), transparent);
+      margin:18px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <!-- Remplacez la source si nécessaire -->
+      <img class="logo" src="https://share.google/images/T2zsXHZMLmRbocWPF" alt="CIMENCAM logo" onerror="this.style.display='none'">
+      <div>
+        <h1>CIMENCAM — HSE Days</h1>
+        <div class="tag">Sécurité • Santé • Environnement</div>
+      </div>
+    </header>
+
+    <section class="hero">
+      <p>Bienvenue ! Dans le cadre des <strong>HSE Days</strong>, choisissez votre action :</p>
+      <ul>
+        <li><strong>📝 Remplir le survey</strong> pour partager vos idées & priorités HSE</li>
+        <li><strong>🎧 Écouter la playlist</strong> des HSE Days (musique en streaming via Google Drive)</li>
+      </ul>
+      <div class="divider"></div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <span class="pill">Étape 1</span>
+        <h2>📝 Remplir le Survey (3–5 min)</h2>
+        <p>Contribuez à renforcer notre culture <em>sécurité & santé au travail</em>.</p>
+        <a class="btn btn-primary" href="https://drive.google.com/file/d/1KPt32GxsKTqqp0baPmssp64oY6sXDJFu/view?usp=sharing" target="_blank" rel="noopener">Remplir le survey</a>
+        <p class="note">⚠️ Conseil : connectez-vous à votre compte professionnel si requis par l’entreprise.</p>
+      </article>
+
+      <article class="card">
+        <span class="pill">Étape 2</span>
+        <h2>🎧 Accéder à la Playlist HSE</h2>
+        <p>Plongez dans l’ambiance avec une sélection musicale dédiée.</p>
+        <a class="btn btn-secondary" href="https://drive.google.com/drive/folders/1rzs6Dtu1RGGPNfiDK9CtWUXp-FpiR5xW?usp=drive_link" target="_blank" rel="noopener">Écouter la playlist</a>
+        <p class="note">ℹ️ Assurez-vous que le dossier est partagé en <em>lecture</em> (“Toute personne disposant du lien”).</p>
+      </article>
+    </section>
+
+    <footer>
+      <p>© CIMENCAM — HSE Days • #HSEdays #Sécurité #Santé #Ensemble</p>
+    </footer>
+  </div>
+</body>
+</html>
